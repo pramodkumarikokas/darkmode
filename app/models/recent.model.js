@@ -18,7 +18,11 @@ const RecentSchema = mongoose.Schema(
       default: function(){
         return Date.now();
       }
-    }
+    },
+      isDeleteRencentStatus: {
+    type: Boolean,
+     default: false
+  }
 }
  
 

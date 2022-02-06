@@ -1,34 +1,33 @@
 const upload = require("../middleware/upload");
 const Recent = require('../models/recent.model.js');
 const Category = require('../models/category.model.js');
-const Favorite = require('../models/favorite.model.js');
-const User=require('../../models/User');
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
-const _ = require('underscore');
-const date = require('date-and-time')
-const createFavorite = async (req, res) => {
-console.log("61f0dec971670423bc10fbfa === ",)
+const Assign = require('../models/assign.model.js');
 
-if(!req.params.taskId) {
+const createAssign = async (req, res) => {
+//console.log("61f0dec971670423bc10fbfa === ",)
+
+if(!req.body.taskId) {
         return res.status(400).send({
-            message: "Tasks name can not be empty"
-        })
-}
-if(!req.body.userid) {
-        return res.status(400).send({
-            message: "userid can not be empty"
+            message: "Tasks id can not be empty"
         })
 }
 
-     var favorite = new Favorite({
-        taskId:req.params.taskId,
-        userid:req.body.userid
+if(!req.body.userId) {
+        return res.status(400).send({
+            message: "user id can not be empty"
+        })
+}
+let subtaskId=req.body.userId || "";
+
+     var recent = new Assign({
+        userId:req.body.userId,
+        taskId:req.body.taskId,
+        subtaskId:subtaskId
     });
-console.log("favorite  ",favorite)
- await favorite.save()
+//console.log("recent  ",recent)
+ await assign.save()
     .then(data => {
-        res.send({"status":200,"message":"successfully","data":favorite});
+        res.send({"status":200,"message":"successfully","data":assign});
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Some error occurred while creating the recents."
@@ -41,60 +40,42 @@ console.log("favorite  ",favorite)
 };
 
 // Retrieve and return all tasks from the database.
-const getAllFavorite = (req, res) => {
+const getAllAssign = (req, res) => {
 
-if(!req.params.userid) {
-        return res.status(400).send({
-            message: "userid can not be empty"
-        })
-}
-Favorite.aggregate([
-                {
-                   $match: { userid: ObjectId(req.params.userid) }
-                },
-      {$lookup:{ from: 'tasks', localField:'taskId', 
-        foreignField:'_id',as:'tasks'}},
-        {$lookup:{ from: 'users', localField:'userid', 
-        foreignField:'_id',as:'users'}},
-        { $sort: { created_at : -1 } }
-]).exec((err, result)=>{
-      if (err) {
-        //date.format(now, 'YYYY/MM/DD HH:mm:ss');
-
+Assign.find().then(subtask => {
+        res.send({"status":200,"result":assign});
+    }).catch(err => {
         res.status(500).send({
-            message: err.message || "Some error occurred while retrieving favorites."
+            "status":401,
+            message: err.message || "Some error occurred while retrieving tasks."
         });
-          console.log("error" ,err)
-      }else{
-         res.send({"status":200,"results":result});
-      }
-})
-
+    });
 };
 
 
-const deleteFavorite = (req, res) => {
-Favorite.updateOne({_id: req.params.favId},{$set:{"isDeleteFavoriteStatus":false}}).then(task => {
+const deleteAssign = (req, res) => {
+Assign.updateOne({_id: req.params.assignId},{$set:{"isDeleteFavoriteStatus":false}}).then(task => {
 /*Task.findByIdAndRemove(req.params.taskId)
     .then(task => {*/
         if(!task) {
             return res.status(404).send({
-                message: "Favorite not found with id " + req.params.favId
+                message: "Assign not found with id " + req.params.assignId
             });
         }
-        res.send({message: "Favorite deleted successfully!"});
+        res.send({message: "Assign deleted successfully!"});
     }).catch(err => {
         if(err.kind === 'ObjectId' || err.name === 'NotFound') {
             return res.status(404).send({
-                message: "Favorite not found with id " + req.params.favId
+                message: "Assign not found with id " + req.params.assignId
             });                
         }
         return res.status(500).send({
-            message: "Could not delete Favorite with id " + req.params.favId
+            message: "Could not delete Assign with id " + req.params.assignId
         });
     });
     
 };
+
 /*
 // Find a single Task with a TaskId
 const geOneSubTask = (req, res) => {
@@ -142,10 +123,10 @@ Subtask.findByIdAndRemove(req.params.subtaskId)
     
 };*/
 
-//Favorite
+
 
 module.exports = {
-  createFavorite: createFavorite,
-   getAllFavorite: getAllFavorite,
-    deleteFavorite: deleteFavorite
+  createAssign: createAssign,
+   getAllAssign: getAllAssign,
+    deleteAssign: deleteAssign
 };

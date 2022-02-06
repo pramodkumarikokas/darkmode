@@ -10,7 +10,7 @@ const date = require('date-and-time')
 const createTask = async (req, res) => {
   try {
 
-
+console.log("assignDatesssssssssss :: ")
 
     await upload(req, res);
 
@@ -30,11 +30,11 @@ const createTask = async (req, res) => {
             message: "category name can not be empty"
         });
     }
-/*if(!req.body.assignId) {
+if(!req.body.userId) {
         return res.status(400).send({
-            message: "assign Id can not be empty"
+            message: "user Id can not be empty"
         });
-    }*/
+    }
       var assignId="";
      if(req.body.assignId) {
        assignId=[req.body.assignId];
@@ -47,20 +47,25 @@ const createTask = async (req, res) => {
     }else{
         location=[{"latitude":"25.473034", "logitude":"81.878357"}];
     }
-     var assignDate="";
+
+
+     var assignDate=new Date();
   if(req.body.assignDate) {
-       assignDate= req.body.assignDate;
+       assignDate= new Date(req.body.assignDate);
+
     }
+    console.log("assignDate :: ",assignDate)
        if (req.files.length > 0) {
-        console.log("  00  >")
+      //  console.log("  00  >")
     var task = new Task({
         notes: req.body.notes || "", 
         name: req.body.name || "", 
-        description: req.body.description ,
+        description: req.body.description,
+        userId: req.body.userId,
         catId:req.body.catId,
         latlong_location:location,
         assignId:assignId,
-         attachments:req.files,
+        attachments:req.files,
         assignDate:assignDate
       
     });
@@ -68,14 +73,15 @@ const createTask = async (req, res) => {
      var task = new Task({
         notes: req.body.notes || "", 
         name: req.body.name || "", 
-        description: req.body.description ,
+        description: req.body.description,
         catId:req.body.catId,
-      latlong_location:location,
+        userId: req.body.userId,
+        latlong_location:location,
         assignId:assignId,
         assignDate:assignDate
        });
 }
-console.log("task :: ",task)
+//console.log("task :: ",task)
  await task.save()
     .then(data => {
         res.send([data]);
@@ -88,11 +94,12 @@ console.log("task :: ",task)
   //  return res.send(`Files has been uploaded.`);
   } catch (error) {
     console.log(error);
+     return res.send({"status":401,"error":error});
 if (req.files.length > 0) {
     if (error.code === "LIMIT_UNEXPECTED_FILE") {
-      return res.send({message:"Too many files to upload."});
+      return res.send({"status":401,message:"Too many files to upload."});
     }
-    return res.send({message:`Error when trying upload many files: ${error}`});
+    return res.send({"status":401,message:`Error when trying upload many files: ${error}`});
 }
   }
 };
@@ -126,14 +133,10 @@ var taskobj={};
     //  var assignId="";
      if(req.body.assignId) {
        taskobj.assignId=[req.body.assignId];
-    }else{
-      //assignId=[{"id":"61dde55ccfcadd23a1751111","type":"tbd"}];
     }
     //var location="";
     if(req.body.location) {
        taskobj.latlong_location=[req.body.location];
-    }else{
-       // location=[{"latitude":"25.473034", "logitude":"81.878357"}];
     }
      //var assignDate="";
   if(req.body.assignDate) {
@@ -174,16 +177,16 @@ var taskobj={};
     console.log(error);
 
     if (error.code === "LIMIT_UNEXPECTED_FILE") {
-      return res.send({message:"Too many files to upload."});
+      return res.send({"status":401,message:"Too many files to upload."});
     }
-    return res.send({message:`Error when trying upload many files: ${error}`});
+    return res.send({"status":401,message:`Error when trying upload many files: ${error}`});
   }
 };
 
 // Retrieve and return all tasks from the database.
-const getAllTask = (req, res) => {
+const getAllTask = async (req, res) => {
 
-Task.aggregate([
+const result1 = await Task.aggregate([
 {
                    $match: { status: true }
                 },
@@ -194,11 +197,13 @@ Task.aggregate([
         {$lookup:{ from: 'recents', localField:'_id', 
         foreignField:'taskId',as:'history'}},
         { $sort: { created_at : -1 } }
-]).exec((err, result)=>{
-
-
-
-      const usersByLikes = result.map(item => {
+]).exec();
+const result2 = await Recent.aggregate([
+      {$lookup:{ from: 'tasks', localField:'taskId', 
+        foreignField:'_id',as:'rcccc'}}
+]).exec();
+if(result1.length>0){
+      const usersByLikes = result1.map(item => {
       //  console.log(new Date().toISOString().split('T')[0] +" ccc>>> " + new Date(item.assignDate).toISOString().split('T')[0])
         //result1
 
@@ -224,11 +229,11 @@ var orderedByMonths = _.groupBy(usersByLikes,  function(element) {
 console.log("date :: ",element.date)
                           return  element.changeDate;
                       });
-            
+          
 var orderedByYears =  _.groupBy(orderedByMonths,  function(month) {
                          return  month[0].date.substring(0,10);
                       });
-
+orderedByMonths.recentHistory=result2;  
 const reverseObj = (obj) => {
   let newObj = {}
 
@@ -240,28 +245,29 @@ const reverseObj = (obj) => {
       newObj[key] = orderedByMonths[key]
     })
 
-  return newObj  
+ return newObj  
 }
-let xw =reverseObj(orderedByMonths);
-/*//xw.recent = xw.w
-xw.today = xw.x
-xw.upcomming = xw.y
-xw.later = xw.z 
-//delete xw.w
-delete xw.x
-delete xw.y
-delete xw.z*/
-  res.send(orderedByMonths);
-/*      if (err) {}
 
-      if (result.length>0) {}else{
-   res.send({"status":200,"message":"no data found","result":[]});
-}*/
-});
 
+ res.send({"status":200,"result":orderedByMonths});
+}else{
+  res.send({"status":200,"result":[]}); 
 }
+
+
+
+
+
+
+
+
+
+};
+
 // Retrieve and return all tasks from the database.
-const getStatusTask = (req, res) => {
+const getStatusTask = async (req, res) => {
+
+
   if(!req.body.taskStatus) {
         return res.status(400).send({
             message: "task status name can not be empty"
@@ -272,12 +278,9 @@ const getStatusTask = (req, res) => {
       let taskStatus=true; 
     }
 
-
-
-
-Task.aggregate([
+const result1 = await Task.aggregate([
 {
-                    $match: { status: true,incomplete: taskStatus }
+                   $match: { status: true,incomplete: taskStatus }
                 },
       {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
@@ -286,11 +289,13 @@ Task.aggregate([
         {$lookup:{ from: 'recents', localField:'_id', 
         foreignField:'taskId',as:'history'}},
         { $sort: { created_at : -1 } }
-]).exec((err, result)=>{
-
-
-
-      const usersByLikes = result.map(item => {
+]).exec();
+const result2 = await Recent.aggregate([
+      {$lookup:{ from: 'tasks', localField:'taskId', 
+        foreignField:'_id',as:'rcccc'}}
+]).exec();
+if(result1.length>0){
+      const usersByLikes = result1.map(item => {
       //  console.log(new Date().toISOString().split('T')[0] +" ccc>>> " + new Date(item.assignDate).toISOString().split('T')[0])
         //result1
 
@@ -316,11 +321,11 @@ var orderedByMonths = _.groupBy(usersByLikes,  function(element) {
 console.log("date :: ",element.date)
                           return  element.changeDate;
                       });
-            
+          
 var orderedByYears =  _.groupBy(orderedByMonths,  function(month) {
                          return  month[0].date.substring(0,10);
                       });
-
+orderedByMonths.recentHistory=result2;  
 const reverseObj = (obj) => {
   let newObj = {}
 
@@ -334,22 +339,15 @@ const reverseObj = (obj) => {
 
   return newObj  
 }
-let xw =reverseObj(orderedByMonths);
-/*//xw.recent = xw.w
-xw.today = xw.x
-xw.upcomming = xw.y
-xw.later = xw.z 
-//delete xw.w
-delete xw.x
-delete xw.y
-delete xw.z*/
-  res.send(orderedByMonths);
-/*      if (err) {}
 
-      if (result.length>0) {}else{
-   res.send({"status":200,"message":"no data found","result":[]});
-}*/
-});
+
+ res.send({"status":200,"result":orderedByMonths});
+}else{
+  res.send({"status":200,"result":[]}); 
+}
+
+
+
 
 
 
@@ -397,7 +395,7 @@ if (result1.length>0) {
 
 
 const deleteTask = (req, res) => {
-Task.updateOne({_id: req.params.taskId},{$set:{"status":false}}).then(task => {
+Task.updateOne({_id: req.params.taskId},{$set:{"isDeleteTaskStatus":false}}).then(task => {
 /*Task.findByIdAndRemove(req.params.taskId)
     .then(task => {*/
         if(!task) {
@@ -420,8 +418,9 @@ Task.updateOne({_id: req.params.taskId},{$set:{"status":false}}).then(task => {
 };
 
 // Retrieve and return all tasks from the database.
-const getAllFilter = (req, res) => {
-  //console.log("req.body.searchText  ",req.body.searchText)
+const getAllFilter = async (req, res) => {
+
+
 if(!req.body.searchText) {
 
 return res.status(400).send({
@@ -439,12 +438,8 @@ let srch={};
     
     //console.log("srch== ",srch)
     let regex = new RegExp(searchText,'i');
-   
-
-
-
-Task.aggregate([
-              {
+const result1 = await Task.aggregate([
+ {
 
           $match: {
             $and: [
@@ -460,11 +455,13 @@ Task.aggregate([
         {$lookup:{ from: 'recents', localField:'_id', 
         foreignField:'taskId',as:'history'}},
         { $sort: { created_at : -1 } }
-]).exec((err, result)=>{
-
-
-
-      const usersByLikes = result.map(item => {
+]).exec();
+const result2 = await Recent.aggregate([
+      {$lookup:{ from: 'tasks', localField:'taskId', 
+        foreignField:'_id',as:'rcccc'}}
+]).exec();
+if(result1.length>0){
+      const usersByLikes = result1.map(item => {
       //  console.log(new Date().toISOString().split('T')[0] +" ccc>>> " + new Date(item.assignDate).toISOString().split('T')[0])
         //result1
 
@@ -490,11 +487,11 @@ var orderedByMonths = _.groupBy(usersByLikes,  function(element) {
 console.log("date :: ",element.date)
                           return  element.changeDate;
                       });
-            
+          
 var orderedByYears =  _.groupBy(orderedByMonths,  function(month) {
                          return  month[0].date.substring(0,10);
                       });
-
+orderedByMonths.recentHistory=result2;  
 const reverseObj = (obj) => {
   let newObj = {}
 
@@ -508,26 +505,13 @@ const reverseObj = (obj) => {
 
   return newObj  
 }
-let xw =reverseObj(orderedByMonths);
-/*//xw.recent = xw.w
-xw.today = xw.x
-xw.upcomming = xw.y
-xw.later = xw.z 
-//delete xw.w
-delete xw.x
-delete xw.y
-delete xw.z*/
-  res.send(orderedByMonths);
-/*      if (err) {}
 
-      if (result.length>0) {}else{
-   res.send({"status":200,"message":"no data found","result":[]});
-}*/
-});
-
-
-
-
+console.log("YYYYYYYYYYYYYY")
+ res.send({"status":200,"result":orderedByMonths});
+}else{
+  console.log("nnnnnnnnnnnnnnnn")
+  res.send({"status":200,"result":[]}); 
+}
 
 
 };

@@ -27,7 +27,11 @@ const memberSchema = mongoose.Schema(
       default: function(){
         return Date.now();
       }
-    }
+    },
+   isDeleteMemberStatus: {
+    type: Boolean,
+     default: false
+  }
 }
  
 

@@ -133,22 +133,23 @@ Subtask.findById(req.params.subtaskId)
 // Delete a task with the specified taskId in the request
 const deleteSubTask = (req, res) => {
 
-Subtask.findByIdAndRemove(req.params.subtaskId)
-    .then(subtask => {
-        if(!subtask) {
+Subtask.updateOne({_id: req.params.subtaskId},{$set:{"isDeleteSubtaskStatus":false}}).then(task => {
+/*Task.findByIdAndRemove(req.params.taskId)
+    .then(task => {*/
+        if(!task) {
             return res.status(404).send({
-                message: "task not found with id " + req.params.subtaskId
+                message: "task not found with id " + req.params.taskId
             });
         }
-        res.send({message: "task deleted successfully!"});
+        res.send({message: "subtask deleted successfully!"});
     }).catch(err => {
         if(err.kind === 'ObjectId' || err.name === 'NotFound') {
             return res.status(404).send({
-                message: "task not found with id " + req.params.subtaskId
+                message: "task not found with id " + req.params.taskId
             });                
         }
         return res.status(500).send({
-            message: "Could not delete task with id " + req.params.subtaskId
+            message: "Could not delete task with id " + req.params.taskId
         });
     });
     

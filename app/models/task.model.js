@@ -7,11 +7,11 @@ const TaskSchema = mongoose.Schema(
         required: true,
         ref: 'Category'
   },
- /* assignId: [{
+  userId: {
   	type: mongoose.Schema.Types.ObjectId,
         required: false,
         ref: 'User'
-  }],*/
+  },
   
   listFavorite: [],
   assignId: [],
@@ -59,6 +59,10 @@ location: {
   wont_abble_to_perform: {
     type: Boolean,
     default: false
+  },
+   isDeleteTaskStatus: {
+    type: Boolean,
+     default: false
   },
    status: {
     type: Boolean,

@@ -43,6 +43,7 @@ require('./app/routes/recent.routes')(app);
 require('./app/routes/favorite.routes')(app);
 require('./app/routes/member.routes')(app);
 require('./app/routes/user.routes')(app);
+require('./app/routes/assign.routes')(app);
 
 app.use('/api/getotp', getOtpRouter);
 app.use('/api/login', verifyTempToken, loginRouter);

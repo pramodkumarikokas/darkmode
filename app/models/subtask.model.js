@@ -20,18 +20,22 @@ const SubtaskSchema = mongoose.Schema(
     type: Date,
     required: false
   },
-  created_at: {
+  sub_created_at: {
       type: Date,
       default: function(){
         return Date.now();
       }
     },
-    updated_at: {
+    sub_updated_at: {
       type: Date,
       default: function(){
         return Date.now();
       }
-    }
+    } ,
+    isDeleteSubtaskStatus: {
+    type: Boolean,
+     default: false
+  }
 }
  
 

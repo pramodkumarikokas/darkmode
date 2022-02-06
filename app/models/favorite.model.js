@@ -23,7 +23,11 @@ const FavoriteSchema = mongoose.Schema(
       default: function(){
         return Date.now();
       }
-    }
+    },
+   isDeleteFavoriteStatus: {
+    type: Boolean,
+     default: true
+  }
 }
  
 

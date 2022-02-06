@@ -38,14 +38,10 @@ const createTask = async (req, res) => {
       var assignId="";
      if(req.body.assignId) {
        assignId=[req.body.assignId];
-    }else{
-      assignId=[{"id":"61dde55ccfcadd23a1751111","type":"tbd"}];
     }
     var location="";
     if(req.body.location) {
        location=[req.body.location];
-    }else{
-        location=[{"latitude":"25.473034", "logitude":"81.878357"}];
     }
      var assignDate="";
   if(req.body.assignDate) {

@@ -1,4 +1,4 @@
-const upload = require("../middleware/upload");
+const upload = require("../middleware/u_upload");
 const User=require('../../models/User');
 
 
@@ -100,27 +100,25 @@ User.findById(req.params.userId)
 
 // Delete a User with the specified userId in the request
 const deleteUser = (req, res) => {
-
-User.findByIdAndRemove(req.params.userId)
-    .then(user => {
-        if(!user) {
+    User.updateOne({_id: req.params.userId},{$set:{"isDeleteUserStatus":false}}).then(task => {
+/*Task.findByIdAndRemove(req.params.taskId)
+    .then(task => {*/
+        if(!task) {
             return res.status(404).send({
-                message: "User not found with id " + req.params.userId
+                message: "task not found with id " + req.params.taskId
             });
         }
-
-     res.send({message: "User deleted successfully!"});
+        res.send({message: "task deleted successfully!"});
     }).catch(err => {
         if(err.kind === 'ObjectId' || err.name === 'NotFound') {
             return res.status(404).send({
-                message: "User not found with id " + req.params.userId
+                message: "task not found with id " + req.params.taskId
             });                
         }
         return res.status(500).send({
-            message: "Could not delete User with id " + req.params.userId
+            message: "Could not delete task with id " + req.params.taskId
         });
     });
-    
 };
 module.exports = {
    updateUser: updateUser,

@@ -9,7 +9,11 @@ const UserSchema = new Schema({
     fname: {type:String},
     lname: {type:String},
     image: {type:String},
-    createdAt:{ type: Date, default: Date.now },
-     updatedAt:{ type: Date, default: Date.now }
+    isDeleteUserStatus: {
+    type: Boolean,
+     default: false
+  },
+    user_createdAt:{ type: Date, default: Date.now },
+     user_updatedAt:{ type: Date, default: Date.now }
 });
 module.exports = mongoose.model('user', UserSchema);
