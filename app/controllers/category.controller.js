@@ -11,6 +11,7 @@ exports.create = (req, res) => {
 
   // Create a category
   const category = new Category({
+    userId: req.body.userId,
     name: req.body.name,
     description: req.body.description,
     published: req.body.published ? req.body.published : false

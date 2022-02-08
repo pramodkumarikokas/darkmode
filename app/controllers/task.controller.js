@@ -1,4 +1,5 @@
 const upload = require("../middleware/upload");
+const backgUpload = require("../middleware/backg_upload");
 const Task = require('../models/task.model.js');
 const Category = require('../models/category.model.js');
 const Subtask = require('../models/subtask.model.js');
@@ -13,7 +14,7 @@ const createTask = async (req, res) => {
 console.log("assignDatesssssssssss :: ")
 
     await upload(req, res);
-
+//await backgUpload(req, res);
       console.log("req.files.length  ",req.files.length)
     if (req.files.length <= 0) {
       //return res.send({message: "You must select at least 1 file."});
@@ -51,10 +52,15 @@ if(!req.body.userId) {
 
      var assignDate=new Date();
   if(req.body.assignDate) {
-       assignDate= new Date(req.body.assignDate);
+       assignDate= req.body.assignDate;
 
     }
-    console.log("assignDate :: ",assignDate)
+    var startDate=new Date();
+    if(req.body.startDate) {
+       startDate= req.body.startDate;
+
+    }
+    console.log("req.files :: ",req.files)
        if (req.files.length > 0) {
       //  console.log("  00  >")
     var task = new Task({
@@ -66,7 +72,8 @@ if(!req.body.userId) {
         latlong_location:location,
         assignId:assignId,
         attachments:req.files,
-        assignDate:assignDate
+        assignDate:assignDate,
+        startDate:startDate
       
     });
 }else{
@@ -78,7 +85,8 @@ if(!req.body.userId) {
         userId: req.body.userId,
         latlong_location:location,
         assignId:assignId,
-        assignDate:assignDate
+        assignDate:assignDate,
+        startDate:startDate
        });
 }
 //console.log("task :: ",task)
@@ -141,6 +149,11 @@ var taskobj={};
      //var assignDate="";
   if(req.body.assignDate) {
       taskobj.assignDate= req.body.assignDate;
+    }
+     //var startDate=new Date();
+    if(req.body.startDate) {
+       taskobj.startDate= req.body.startDate;
+
     }
       const taskupdate = taskobj;
      // console.log("taskupdate ",taskupdate)

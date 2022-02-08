@@ -36,6 +36,10 @@ location: {
     type: String,
     required: false
   },
+  startDate: {
+    type: Date,
+    required: false
+  },
   assignDate: {
     type: Date,
     required: false
@@ -61,6 +65,10 @@ location: {
     default: false
   },
    isDeleteTaskStatus: {
+    type: Boolean,
+     default: false
+  },
+   task_status: {
     type: Boolean,
      default: false
   },

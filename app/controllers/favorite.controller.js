@@ -1,6 +1,7 @@
 const upload = require("../middleware/upload");
 const Recent = require('../models/recent.model.js');
 const Category = require('../models/category.model.js');
+const Task = require('../models/task.model.js');
 const Favorite = require('../models/favorite.model.js');
 const User=require('../../models/User');
 const mongoose = require('mongoose');
@@ -20,15 +21,57 @@ if(!req.body.userid) {
             message: "userid can not be empty"
         })
 }
+if(!req.body.isFavorite) {
+        return res.status(400).send({
+            message: "isFavorite can not be empty"
+        })
+}
+
 
      var favorite = new Favorite({
         taskId:req.params.taskId,
         userid:req.body.userid
     });
-console.log("favorite  ",favorite)
+     var isgetFavorite="";
+ if(req.body.isFavorite==1){
+            isgetFavorite=true;
+     }
+ if(req.body.isFavorite==0){
+        isgetFavorite=false;
+     }
+console.log("ObjectId  ", ObjectId(req.body.userId))
  await favorite.save()
     .then(data => {
+
+            Task.updateOne({_id: req.params.taskId},{$set:{"isFavorite":isgetFavorite}}).then(note => {
+        //console.log("nnn ",note)
+        if(!note) {
+            return res.status(404).send({
+                message: "Task not found with id " + req.params.taskId
+            });
+        }
         res.send({"status":200,"message":"successfully","data":favorite});
+        /*res.send(
+            {
+                "status":200,
+                "message":"favorite successfully",
+                "data":taskupdate
+           }
+    );*/
+    }).catch(err => {
+        if(err.kind === 'ObjectId') {
+            return res.status(404).send({
+                message: "Task not found with id " + req.params.taskId
+            });                
+        }
+        return res.status(500).send({
+            message: "Error updating note with id " + req.params.taskId
+        });
+    });
+
+
+
+        
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Some error occurred while creating the recents."
@@ -41,34 +84,89 @@ console.log("favorite  ",favorite)
 };
 
 // Retrieve and return all tasks from the database.
-const getAllFavorite = (req, res) => {
+const getAllFavorite = async (req, res) => {
 
 if(!req.params.userid) {
         return res.status(400).send({
             message: "userid can not be empty"
         })
 }
-Favorite.aggregate([
-                {
-                   $match: { userid: ObjectId(req.params.userid) }
-                },
-      {$lookup:{ from: 'tasks', localField:'taskId', 
-        foreignField:'_id',as:'tasks'}},
-        {$lookup:{ from: 'users', localField:'userid', 
-        foreignField:'_id',as:'users'}},
-        { $sort: { created_at : -1 } }
-]).exec((err, result)=>{
-      if (err) {
-        //date.format(now, 'YYYY/MM/DD HH:mm:ss');
 
-        res.status(500).send({
-            message: err.message || "Some error occurred while retrieving favorites."
-        });
-          console.log("error" ,err)
-      }else{
-         res.send({"status":200,"results":result});
-      }
+
+   
+let ugr=req.params.userid;
+//let ugr="61d2c6d4188cad8001c8647f";//req.params.userid;
+//console.log("ugr ",ugr)
+        const result1 = await Task.aggregate([
+          {
+                $match: { userId: ObjectId(ugr),isFavorite:true }
+
+                  // $match: {"task.$_id":ugr }
+         },
+      {$lookup:{ from: 'categories', localField:'catId', 
+        foreignField:'_id',as:'category'}},
+        {$lookup:{ from: 'subtasks', localField:'_id', 
+        foreignField:'assignId',as:'subtasks'}},
+        {$lookup:{ from: 'recents', localField:'_id', 
+        foreignField:'taskId',as:'history'}},
+        { $sort: { created_at : -1 } }
+]).exec();
+const result2 = await Recent.aggregate([
+      {$lookup:{ from: 'tasks', localField:'taskId', 
+        foreignField:'_id',as:'rcccc'}}
+]).exec();
+if(result1.length>0){
+      const usersByLikes = result1.map(item => {
+      //  console.log(new Date().toISOString().split('T')[0] +" ccc>>> " + new Date(item.assignDate).toISOString().split('T')[0])
+        //result1
+
+        if(new Date().toISOString().split('T')[0] > new Date(item.assignDate).toISOString().split('T')[0]){
+
+              item.date= new Date(item.assignDate).toISOString().split('T')[0];
+              item.changeDate= "later";
+         }
+
+          if(new Date().toISOString().split('T')[0] == new Date(item.assignDate).toISOString().split('T')[0]){
+
+              item.date= new Date(item.assignDate).toISOString().split('T')[0];
+              item.changeDate= "today";
+          }
+           if(new Date().toISOString().split('T')[0] < new Date(item.assignDate).toISOString().split('T')[0]){
+              item.date= new Date(item.assignDate).toISOString().split('T')[0];
+              item.changeDate= "upcomming";
+          }
+    return item;
 })
+
+var orderedByMonths = _.groupBy(usersByLikes,  function(element) {
+console.log("date :: ",element.date)
+                          return  element.changeDate;
+                      });
+          
+var orderedByYears =  _.groupBy(orderedByMonths,  function(month) {
+                         return  month[0].date.substring(0,10);
+                      });
+orderedByMonths.recentHistory=result2;  
+const reverseObj = (obj) => {
+  let newObj = {}
+
+  Object.keys(orderedByYears)
+    .sort()
+    .reverse()
+    .forEach((key) => {
+      console.log(key)
+      newObj[key] = orderedByMonths[key]
+    })
+
+  return newObj  
+}
+
+
+ res.send({"status":200,"result":orderedByMonths});
+}else{
+  res.send({"status":200,"result":[]}); 
+}
+
 
 };
 

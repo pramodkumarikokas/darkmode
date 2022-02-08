@@ -5,7 +5,10 @@ const UserSchema = new Schema({
     mobile: {type:String, unique:true},
     email: {type:String},
     otp: {type:String},
-    image: {type:String},
+      profileimage: {
+    type: [],
+    required: false
+  },
     fname: {type:String},
     lname: {type:String},
     image: {type:String},

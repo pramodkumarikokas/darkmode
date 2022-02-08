@@ -24,10 +24,10 @@ var userobj={};
 
 
     if (req.files.length > 0) {
-     userobj.images=req.files;
+     userobj.profileimage=req.files;
     }
       const userupdate = userobj;
-     
+     console.log("userupdate >> ",userupdate)
     User.updateOne({_id: req.params.userId},{$set:userupdate}).then(note => {
         if(!note) {
             //
