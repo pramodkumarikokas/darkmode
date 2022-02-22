@@ -12,7 +12,7 @@ router.get("/get-all-task", verifyBaseToken, taskController.getAllTask);
 router.get("/get-task-detils/:taskId",verifyBaseToken, taskController.geOneTask);
 router.put("/delete-task/:taskId",verifyBaseToken, taskController.deleteTask);
 router.post("/get-status-task", verifyBaseToken, taskController.getStatusTask);
-router.get("/privacypolicy", verifyBaseToken, taskController.privacypolicy);
+router.get("/privacypolicy", taskController.privacypolicy);
 
 router.post("/search", verifyBaseToken, taskController.getAllFilter);
 

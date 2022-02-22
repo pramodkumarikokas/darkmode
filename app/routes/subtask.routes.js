@@ -10,7 +10,7 @@ router.put("/update-sub-task/:subtaskId",verifyBaseToken, subtaskController.upda
 router.get("/get-all-sub-task", verifyBaseToken, subtaskController.getAllSubTask);
 router.get("/get-task-sub-detils/:subtaskId",verifyBaseToken, subtaskController.geOneSubTask);
 router.delete("/delete-sub-task/:subtaskId",verifyBaseToken, subtaskController.deleteSubTask);
-
+router.post("/get-status-subtask", verifyBaseToken, subtaskController.getStatusSubTask);
 //router.post("/get-filter", verifyBaseToken, taskController.getAllFilter);
 
 return app.use("/", router);

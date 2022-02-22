@@ -4,7 +4,7 @@ const multer = require("multer");
 
 var storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, path.join(`${__dirname}/../../public/images`));
+    callback(null, path.join(`${__dirname}/../../public/subtaskimages`));
     //console.log("11>  "+path.join(`${__dirname}/../../public/upload`))
      // console.log("22>  "+path.join(`${__dirname}/../upload`))
       //  console.log("3>  "+path.join(`${__dirname}/upload`))
@@ -17,11 +17,11 @@ var storage = multer.diskStorage({
       return callback(message, null);
     }
 
-    var filename = `${Date.now()}-pimg-${file.originalname}`;
+    var filename = `${Date.now()}-bezkoder-${file.originalname}`;
     callback(null, filename);
   }
 });
 
-var uploadFiles = multer({ storage: storage }).array("profileimage", 1);
+var uploadFiles = multer({ storage: storage }).array("subtask_images", 10);
 var uploadFilesMiddleware = util.promisify(uploadFiles);
 module.exports = uploadFilesMiddleware;

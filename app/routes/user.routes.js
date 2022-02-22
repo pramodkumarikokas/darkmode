@@ -7,7 +7,7 @@ const verifyBaseToken=require('../../middleware/basetoken');
 
 
 let routes = app => {
-router.put("/update-user/:userId",verifyBaseToken, userController.updateUser);
+router.put("/update-user",verifyBaseToken, userController.updateUser);
 router.get("/get-all-user", verifyBaseToken, userController.getAllUser);
 router.get("/get-user-detils/:userId",verifyBaseToken, userController.geOneUser);
 router.put("/delete-user/:userId",verifyBaseToken, userController.deleteUser);

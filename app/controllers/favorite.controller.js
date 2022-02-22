@@ -28,10 +28,7 @@ if(!req.body.isFavorite) {
 }
 
 
-     var favorite = new Favorite({
-        taskId:req.params.taskId,
-        userid:req.body.userid
-    });
+
      var isgetFavorite="";
  if(req.body.isFavorite==1){
             isgetFavorite=true;
@@ -39,8 +36,51 @@ if(!req.body.isFavorite) {
  if(req.body.isFavorite==0){
         isgetFavorite=false;
      }
-console.log("ObjectId  ", ObjectId(req.body.userId))
- await favorite.save()
+     var favorite = new Favorite({
+        taskId:req.params.taskId,
+        userid:req.body.userid
+    });
+let tsid=ObjectId(req.params.taskId);
+console.log("req.params.taskId  ", tsid)
+
+await Favorite.findOne({taskId: tsid},  function(err, favdata) {
+   
+      //console.log("??bbb?? ", typeof favdata) 
+      // console.log("??err>>>>?? ",( err) )
+if( favdata!=null){
+  console.log("nn>>>>>n>>> ",favdata)
+    Task.updateOne({_id: (req.params.taskId)},{$set:{"isFavorite":isgetFavorite}}).then(fddd => {
+      
+        if(!fddd) {
+            return res.status(404).send({
+                message: "Task not found with id " + req.params.taskId
+            });
+        }
+      res.send({"status":200,"message":"successfull000y..","data":isgetFavorite});
+        /*res.send(
+            {
+                "status":200,
+                "message":"favorite successfully",
+                "data":taskupdate
+           }
+    );*/
+    }).catch(err => {
+        if(err.kind === 'ObjectId') {
+            return res.status(404).send({
+                message: "Task not found with id " + req.params.taskId
+            });                
+        }
+        return res.status(500).send({
+            message: "Error updating note with id " + req.params.taskId
+        });
+
+    });
+
+
+//console.log("favdata ",favdata)
+}else{
+ console.log("nnnmmmmmmmmmmmmm/> ",favdata)
+  favorite.save()
     .then(data => {
 
             Task.updateOne({_id: req.params.taskId},{$set:{"isFavorite":isgetFavorite}}).then(note => {
@@ -67,6 +107,7 @@ console.log("ObjectId  ", ObjectId(req.body.userId))
         return res.status(500).send({
             message: "Error updating note with id " + req.params.taskId
         });
+
     });
 
 
@@ -77,9 +118,9 @@ console.log("ObjectId  ", ObjectId(req.body.userId))
             message: err.message || "Some error occurred while creating the recents."
         });
     });
-
-
-
+}
+ 
+})
 
 };
 
@@ -95,15 +136,20 @@ if(!req.params.userid) {
 
    
 let ugr=req.params.userid;
-//let ugr="61d2c6d4188cad8001c8647f";//req.params.userid;
-//console.log("ugr ",ugr)
-        const result1 = await Task.aggregate([
-          {
-                $match: { userId: ObjectId(ugr),isFavorite:true }
 
-                  // $match: {"task.$_id":ugr }
-         },
-      {$lookup:{ from: 'categories', localField:'catId', 
+console.log("ugr ",ugr)
+
+const result1 = await Task.aggregate([
+     /* {
+                $match: { userid: ObjectId(ugr) }
+
+                  // $match: {"task.$_id":ugr } favorites
+         },*/
+      {$lookup:{ from: 'favorites', localField:'_id', 
+        foreignField:'taskId',pipeline: [
+           { $match: { userid: ObjectId(ugr) } }
+         ],as:'AllfavoriteData'}},
+        {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
         {$lookup:{ from: 'subtasks', localField:'_id', 
         foreignField:'assignId',as:'subtasks'}},
@@ -111,10 +157,16 @@ let ugr=req.params.userid;
         foreignField:'taskId',as:'history'}},
         { $sort: { created_at : -1 } }
 ]).exec();
+
+
+
+
 const result2 = await Recent.aggregate([
       {$lookup:{ from: 'tasks', localField:'taskId', 
         foreignField:'_id',as:'rcccc'}}
 ]).exec();
+
+
 if(result1.length>0){
       const usersByLikes = result1.map(item => {
       //  console.log(new Date().toISOString().split('T')[0] +" ccc>>> " + new Date(item.assignDate).toISOString().split('T')[0])

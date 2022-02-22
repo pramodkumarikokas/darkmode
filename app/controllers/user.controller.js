@@ -28,7 +28,7 @@ var userobj={};
     }
       const userupdate = userobj;
      console.log("userupdate >> ",userupdate)
-    User.updateOne({_id: req.params.userId},{$set:userupdate}).then(note => {
+    User.updateOne({_id: req.body.userId},{$set:userupdate}).then(note => {
         if(!note) {
             //
             return res.status(404).send({

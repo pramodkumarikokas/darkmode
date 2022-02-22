@@ -66,9 +66,13 @@ location: {
   },
    isDeleteTaskStatus: {
     type: Boolean,
-     default: false
+     default: true
   },
    task_status: {
+    type: Boolean,
+     default: false
+  },
+   wont_abble_to_perform: {
     type: Boolean,
      default: false
   },

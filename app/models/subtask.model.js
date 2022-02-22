@@ -2,12 +2,23 @@ const mongoose = require('mongoose');
 
 const SubtaskSchema = mongoose.Schema(
 	{
-  assignId: {
+  taskId: {
   	type: mongoose.Schema.Types.ObjectId,
         required: false,
         ref: 'Task'
   },
-  
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'User'
+  },
+  sub_listFavorite: [],
+  sub_assignId: [],
+  sub_latlong_location: [],
+  subtask_images: {
+    type: [],
+    required: false
+  },
   sub_name: {
     type: String,
     required: true
@@ -35,9 +46,32 @@ const SubtaskSchema = mongoose.Schema(
     isDeleteSubtaskStatus: {
     type: Boolean,
      default: false
+  },
+  subtaskStatus: {
+    type: Boolean,
+     default: false
+  }, 
+  sub_getting_started: {
+    type: Boolean,
+    default: false
+  },
+   sub_in_progress: {
+    type: Boolean,
+    default: false
+  },
+     sub_isFavorite: {
+    type: Boolean,
+    default: false
+  },
+   sub_incomplete: {
+    type: Boolean,
+     default: false
+  },
+  sub_wont_abble_to_perform: {
+    type: Boolean,
+    default: false
   }
 }
- 
 
 );
 SubtaskSchema.pre('save', function(done) {

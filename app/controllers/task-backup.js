@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const _ = require('underscore');
 const date = require('date-and-time')
+const User=require('../../models/User');
 const createTask = async (req, res) => {
   try {
 
@@ -185,6 +186,8 @@ Task.aggregate([
                 },
       {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
+        {$lookup:{ from: 'users', localField:'userId', 
+        foreignField:'_id',as:'user'}},
         {$lookup:{ from: 'subtasks', localField:'_id', 
         foreignField:'assignId',as:'subtasks'}},
         {$lookup:{ from: 'recents', localField:'_id', 
@@ -320,6 +323,8 @@ Task.aggregate([
                 },
       {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
+        {$lookup:{ from: 'users', localField:'userId', 
+        foreignField:'_id',as:'user'}},
         {$lookup:{ from: 'subtasks', localField:'_id', 
         foreignField:'assignId',as:'subtasks'}},
         {$lookup:{ from: 'recents', localField:'_id', 
@@ -449,6 +454,8 @@ Task.aggregate([
                 },
       {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
+        {$lookup:{ from: 'users', localField:'userId', 
+        foreignField:'_id',as:'user'}},
         {$lookup:{ from: 'subtasks', localField:'_id', 
         foreignField:'assignId',as:'subtasks'}},
 ]).exec((err, result1)=>{
@@ -530,6 +537,8 @@ Task.aggregate([
                 },
       {$lookup:{ from: 'categories', localField:'catId', 
         foreignField:'_id',as:'category'}},
+        {$lookup:{ from: 'users', localField:'userId', 
+        foreignField:'_id',as:'user'}},
         {$lookup:{ from: 'subtasks', localField:'_id', 
         foreignField:'assignId',as:'subtasks'}},
         {$lookup:{ from: 'recents', localField:'_id', 

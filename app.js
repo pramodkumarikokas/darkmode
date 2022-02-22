@@ -32,7 +32,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to dark application  cheeekk 11." });
+/*
+	var TMClient = require('textmagic-rest-client');
+var c = new TMClient('username', 'C7XDKZOQZo6HvhJwtUw0MBcslfqwtp4');
+c.Messages.send({text: 'test message', phones:'7087474801'}, function(err, res){
+    console.log('Messages.send()', err, res);
+});
+*/
+  res.json({ message: "Welcome to dark application  cheeekk uu ." });
 }); 
 //require("./app/routes/web")(app);
 
